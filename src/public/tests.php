@@ -1,0 +1,1 @@
+<?php require('../../tests/run.php');
