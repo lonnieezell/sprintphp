@@ -1,8 +1,8 @@
 <?php
 
-//use Mockery as m;
-
 require (TESTS_DIR .'support/database.php');
+require (BASEPATH .'/core/Model.php');
+require (APPPATH .'core/MY_Model.php');
 
 class MY_ModelTest extends CI_UnitTestCase {
 

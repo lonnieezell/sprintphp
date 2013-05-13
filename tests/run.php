@@ -31,6 +31,7 @@ define('BF_DIR', MAIN_PATH .'src/bonfire/');			// Bonfire core directory
 //  or Bonfire core folders with the --app_only or -bf_only options on the CLI
 $ignore_folders = array(
 	TESTS_DIR .'support',
+	TESTS_DIR .'simpletest'
 );
 
 // Only Folder

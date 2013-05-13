@@ -1,6 +1,6 @@
 <?php if (!defined('BASEPATH')) exit('No direct script access allowed');
 
-class Protected_attribute_model extends BF_Model {
+class Protected_attribute_model extends MY_Model {
 
 	protected $_table = 'records_table';
 

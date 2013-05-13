@@ -51,14 +51,3 @@ class MY_DB {
     public function row_array() { }
     public function result_array() { }
 }
-
-/*
-	Fake CI_Model for testing our models with...
- */
-class CI_Model {
-
-	public $db;
-
-	public function __construct() {	}
-
-}
