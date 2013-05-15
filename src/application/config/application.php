@@ -9,6 +9,22 @@
     $config['auto_migrate'] = true;
 
 //--------------------------------------------------------------------
+// Authentication
+//--------------------------------------------------------------------
+//
+    $config['auth.allowed_drivers'] = array('auth_sprintauth');
+
+    $config['auth.default_driver']  = 'sprintauth';
+
+//--------------------------------------------------------------------
+// Modules
+//--------------------------------------------------------------------
+//
+    $config['modules_locations'] = array(
+        APPPATH .'modules/'
+    );
+
+//--------------------------------------------------------------------
 // Caching
 //--------------------------------------------------------------------
 // Sets the default types of caching used throughout the site. Possible
