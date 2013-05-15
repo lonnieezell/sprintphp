@@ -51,7 +51,11 @@ class MY_Controller extends CI_Controller {
 
         if (!is_null($this->language_file)) $this->lang->load($this->language_file);
 
-        if (!is_null($this->model_file))    $this->load->model($this->model_file);
+        if (!is_null($this->model_file))
+        {
+            $this->load->database();
+            $this->load->model($this->model_file);
+        }
 
         //--------------------------------------------------------------------
         // Profiler
@@ -117,7 +121,8 @@ class MY_Controller extends CI_Controller {
 
         // Render our layout and we're done!
         $layout = !empty($this->use_layout) ? $this->use_layout : 'index';
-        $this->load->view('ui/'. $layout, $data);
+
+        $this->load->view('theme/'. $layout, $data, false, true);
 
         // Reset our custom view attributes.
         $this->use_view = $this->use_layout = '';

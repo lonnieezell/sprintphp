@@ -1023,6 +1023,11 @@ class Route {
 	 * Lets the system know about different 'areas' within the site, like
 	 * the admin area, that maps to certain controllers.
 	 *
+	 * Example:
+	 * 		Route::area('admin');
+	 *
+	 * 		/admin/photos 		- Routes to photos modules, admin controller, index method
+	 *
 	 * @param  string $area       The name of the area.
 	 * @param  string $controller The controller name to look for.
 	 */

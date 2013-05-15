@@ -128,7 +128,7 @@ class MY_Model extends CI_Model {
      * @var string
      * @access protected
      */
-    protected $date_format = 'int';
+    protected $date_format = 'datetime';
 
     /**
      * Support for soft_deletes.
@@ -182,6 +182,8 @@ class MY_Model extends CI_Model {
 
     public function __construct()
     {
+        parent::__construct();
+
         // Always protect our attributes
         array_unshift($this->before_insert, 'protect_attributes');
         array_unshift($this->before_update, 'protect_attributes');
@@ -381,14 +383,14 @@ class MY_Model extends CI_Model {
      */
     public function insert($data, $skip_validation=FALSE)
     {
+        if ($skip_validation === FALSE)
+        {
+            $data = $this->validate($data);
+        }
+
         if ($data !== FALSE)
         {
             $data = $this->trigger('before_insert', $data);
-
-            if ($skip_validation === FALSE)
-            {
-                $data = $this->validate($data);
-            }
 
             $this->db->insert($this->_table, $data);
             $id = $this->db->insert_id();
@@ -456,12 +458,12 @@ class MY_Model extends CI_Model {
      */
     public function update($id, $data, $skip_validation=FALSE)
     {
-        $data = $this->trigger('before_update', $data);
-
         if ($skip_validation === FALSE)
         {
             $data = $this->validate($data);
         }
+
+        $data = $this->trigger('before_update', $data);
 
         // Will be false if it didn't validate.
         if ($data !== FALSE)
@@ -544,12 +546,12 @@ class MY_Model extends CI_Model {
      */
     public function update_many($ids, $data, $skip_validation=FALSE)
     {
-        $data = $this->trigger('before_update', $data);
-
         if ($skip_validation === FALSE)
         {
             $data = $this->validate($data);
         }
+
+        $data = $this->trigger('before_update', $data);
 
         // Will be false if it didn't validate.
         if ($data !== FALSE)
@@ -1166,7 +1168,7 @@ class MY_Model extends CI_Model {
      *
      * @return string
      */
-    protected function get_db_error_message()
+    public function get_db_error_message()
     {
         switch ($this->db->platform())
         {
