@@ -1,4 +1,4 @@
-<?php $this->load->view('theme/header', null, false, true); ?>
+<?php $this->load->view('theme/header'); ?>
 
     <!-- Top Navigation -->
     <nav class="top-bar">
@@ -35,4 +35,4 @@
         </div>
     </section>
 
-<?php $this->load->view('theme/footer', null, false, true); ?>
+<?php $this->load->view('theme/footer'); ?>
