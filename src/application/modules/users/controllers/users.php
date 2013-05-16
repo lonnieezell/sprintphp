@@ -24,7 +24,29 @@ class Users extends MY_Controller {
 
     public function login()
     {
-        $this->auth->login();
+        $this->load->library('form_validation');
+
+        if ($this->input->post('submit'))
+        {
+            $redirect = $this->input->post('redirect');
+
+            $remember = (boolean)$this->input->post('remember');
+
+            $data = array(
+                'email' => $this->input->post('email', true),
+                'password' => $this->input->post('password')
+            );
+
+            $this->form_validation->set_rules('email', 'Email', 'trim|required|xss_clean');
+            $this->form_validation->set_rules('password', 'Password', 'trim|required|xss_clean');
+
+            if ($this->form_validation->run())
+            {
+                $this->auth->login($data, $remember, $redirect);
+            }
+        }
+
+        $this->set_var('page_title', 'Login');
         $this->render();
     }
 

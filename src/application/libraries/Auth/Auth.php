@@ -46,20 +46,6 @@ class Auth extends CI_Driver_Library {
     //--------------------------------------------------------------------
 
     /**
-     * Attemps to register a new user.
-     *
-     * @param  array  $fields [description]
-     * @return [type]         [description]
-     */
-    public function register($fields=array())
-    {
-        return $this->{$this->_driver}->register($fields);
-    }
-
-    //--------------------------------------------------------------------
-
-
-    /**
      * Attempts to log the user in. The credentials array contains any
      * key/value pairs to be passed to the driver.
      *
@@ -67,16 +53,21 @@ class Auth extends CI_Driver_Library {
      * @param  boolean $remember
      * @return mixed
      */
-    public function login( $credentials=array(), $remember=FALSE, $redirect=null )
+    public function login( $credentials, $remember=FALSE, $redirect=null )
     {
-        $return = $this->{$this->_driver}->login($credentials, $remember);
+        $user = $this->{$this->_driver}->login($credentials, $remember);
+
+        if ($user)
+        {
+            $this->user = $user;
+        }
 
         if (!empty($redirect))
         {
             redirect($redirect);
         }
 
-        return $return;
+        return is_object($user) ? true : false;
     }
 
     //--------------------------------------------------------------------

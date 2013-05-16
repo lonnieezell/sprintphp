@@ -16,7 +16,10 @@ class Auth_sprintauth extends CI_Driver {
         $this->ci->load->database();
 
         // Log us in if we have a remember me cookie
-        $this->is_remembered(TRUE);
+        $user = $this->is_remembered(TRUE);
+
+        if (is_object($user)) $this->user = $user;
+        unset($user);
     }
 
     //--------------------------------------------------------------------
@@ -44,14 +47,14 @@ class Auth_sprintauth extends CI_Driver {
         unset($credentials['password']);
 
         // Grab the user from the database.
-        $user = $this->ci->user_model->where($credentials)->find();
+        $user = $this->ci->user_model->find_by($credentials);
 
         if ($user)
         {
             // Load the password hash library
             if (!class_exists('PasswordHash'))
             {
-                require(dirname(__FILE__) .'/PasswordHash.php');
+                require(dirname(__FILE__) .'/../PasswordHash.php');
             }
             $hasher = new PasswordHash(8, false);
 
@@ -59,7 +62,6 @@ class Auth_sprintauth extends CI_Driver {
             if ($hasher->CheckPassword($password, $user->password_hash))
             {
                 unset($hasher);
-                parent::$user = $user;
 
                 $this->ci->session->set_userdata(array(
                     'user_id'   => (int)$user->id
@@ -68,10 +70,16 @@ class Auth_sprintauth extends CI_Driver {
                 // Do we remember them?
                 if ($remember === TRUE)
                 {
-                    $this->remember_me($user_id);
+                    $this->remember_me($user->id);
                 }
 
-                return $user->id;
+                // Save our last login date
+                $data = array(
+                    'last_login'    => date('Y-m-d H:i:s')
+                );
+                $this->ci->user_model->update($user->id, $data, TRUE);
+
+                return $user;
             }
             else
             {
@@ -137,6 +145,7 @@ class Auth_sprintauth extends CI_Driver {
     private function is_remembered($set_user=FALSE)
     {
         $this->ci->load->library('encrypt');
+        $this->ci->load->helper('cookie');
 
         // Is there any cookie data?
         if ($cookie_data = get_cookie('rememberme'))
@@ -176,9 +185,8 @@ class Auth_sprintauth extends CI_Driver {
 
                 if ($user)
                 {
-                    parent::$user = $user;
+                    return $user;
                 }
-                unset($user);
             }
 
             return TRUE;

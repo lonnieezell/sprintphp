@@ -24,6 +24,9 @@ class MY_Controller extends CI_Controller {
     private $use_view     = '';
     private $use_layout   = '';
 
+    // Stores data variables to be sent to the view.
+    protected $vars = array();
+
     //--------------------------------------------------------------------
 
     public function __construct()
@@ -111,10 +114,13 @@ class MY_Controller extends CI_Controller {
      * @param  boolean $return_data [description]
      * @return [type]               [description]
      */
-    protected function render($data=null)
+    protected function render($data=array())
     {
         // Calc our view name based on current method/controller
         $view = !empty($this->use_view) ? $this->use_view : $this->router->fetch_class() .'/'. $this->router->fetch_method();
+
+        // Merge any saved vars into the data
+        $data = array_merge($data, $this->vars);
 
         // We'll make the view content available to the template.
         $data['view_content'] =  $this->load->view($view, $data, true);
@@ -129,6 +135,20 @@ class MY_Controller extends CI_Controller {
     }
 
     //--------------------------------------------------------------------
+
+    /**
+     * Sets a data variable to be sent to the view during the render() method.
+     *
+     * @param string $name
+     * @param mixed $value
+     */
+    public function set_var($name, $value)
+    {
+        $this->vars[$name] = $value;
+    }
+
+    //--------------------------------------------------------------------
+
 
     /**
      * Specifies a custom view file to be used during the render() method.
