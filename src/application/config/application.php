@@ -6,7 +6,13 @@
 // We can automatically run any outstanding migrations in the core,
 // the application and the modules themselves if this is set to TRUE.
 //
-    $config['auto_migrate'] = true;
+    $config['auto_migrate'] = false;
+
+//--------------------------------------------------------------------
+// Site Information
+//--------------------------------------------------------------------
+//
+    $config['site.name'] = 'Sprint PHP';
 
 //--------------------------------------------------------------------
 // Authentication
@@ -15,6 +21,12 @@
     $config['auth.allowed_drivers'] = array('auth_sprintauth');
 
     $config['auth.default_driver']  = 'sprintauth';
+
+//--------------------------------------------------------------------
+// Profiler
+//--------------------------------------------------------------------
+//
+    $config['show_profiler'] = true;
 
 //--------------------------------------------------------------------
 // Modules
