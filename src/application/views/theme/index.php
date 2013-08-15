@@ -1,21 +1,23 @@
 <?php $this->load->view('theme/header'); ?>
 
     <!-- Top Navigation -->
-    <nav class="top-bar">
-        <ul class="title-area">
-            <li class="name">
-                <h1><a href="#">My Site</a></h1>
-            </li>
-            <li class="toggle-topbar menu-icon"><a href="#"><span>Menu</span></a></li>
-        </ul>
-
-        <section class="top-bar-section">
-            <ul class="right">
-                <li class="divider"></li>
-                <li><a href="#">Users</a></li>
+    <div class="contain-to-grid">
+        <nav class="top-bar">
+            <ul class="title-area">
+                <li class="name">
+                    <h1><a href="#">My Site</a></h1>
+                </li>
+                <li class="toggle-topbar menu-icon"><a href="#"><span>Menu</span></a></li>
             </ul>
-        </section>
-    </nav>
+
+            <section class="top-bar-section">
+                <ul class="right">
+                    <li class="divider"></li>
+                    <li><a href="/users">Users</a></li>
+                </ul>
+            </section>
+        </nav>
+    </div>
 
     <?php if (isset($page_title)) :?>
     <header>

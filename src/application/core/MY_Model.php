@@ -178,6 +178,13 @@ class MY_Model extends CI_Model {
     protected $return_type      = 'object';
     protected $temp_return_type = NULL;
 
+    /*
+        If TRUE, inserts will return the last_insert_id. However,
+        this can potentially slow down large imports drastically
+        so you can turn it off with the return_insert_id(false) method.
+     */
+    protected $return_insert_id = true;
+
     //--------------------------------------------------------------------
 
     public function __construct()
@@ -385,7 +392,7 @@ class MY_Model extends CI_Model {
     {
         if ($skip_validation === FALSE)
         {
-            $data = $this->validate($data);
+            $data = $this->validate($data, 'insert');
         }
 
         if ($data !== FALSE)
@@ -393,11 +400,17 @@ class MY_Model extends CI_Model {
             $data = $this->trigger('before_insert', $data);
 
             $this->db->insert($this->_table, $data);
-            $id = $this->db->insert_id();
 
-            $this->trigger('after_insert', $id);
+            if ($this->return_insert_id)
+            {
+                $id = $this->db->insert_id();
 
-            return $id;
+                $this->trigger('after_insert', $id);
+
+                return $id;
+            }
+
+            return TRUE;
         }
         else
         {
@@ -433,10 +446,10 @@ class MY_Model extends CI_Model {
 
         if ($data !== FALSE)
         {
-            $data['batch'] = true;
-            $data = $this->trigger('before_insert', $data);
+            //$data['batch'] = true;
+            //$data = $this->trigger('before_insert', $data);
 
-            unset($data['batch']);
+            //unset($data['batch']);
 
             return $this->db->insert_batch($this->_table, $data);
         }
@@ -850,6 +863,21 @@ class MY_Model extends CI_Model {
     //--------------------------------------------------------------------
 
     /**
+     * Set the return_insert_id value.
+     *
+     * @param  boolean $return If TRUE, insert will return the insert_id.
+     */
+    public function return_insert_id($return = true)
+    {
+        $this->return_insert_id = (bool)$return;
+
+        return $this;
+    }
+
+    //--------------------------------------------------------------------
+
+
+    /**
      * A convenience method to return options for form dropdown menus.
      *
      * Can pass either Key ID and Label Table names or Just Label Table name.
@@ -896,7 +924,7 @@ class MY_Model extends CI_Model {
     {
         $this->db->select($field);
         $this->db->where($this->primary_key, $id);
-        $query = $this->db->get($this->table);
+        $query = $this->db->get($this->_table);
 
         if ($query && $query->num_rows() > 0)
         {
@@ -920,7 +948,7 @@ class MY_Model extends CI_Model {
     public function is_unique($field, $value)
     {
         $this->db->where($field, $value);
-        $query = $this->db->get($this->table);
+        $query = $this->db->get($this->_table);
 
         if ($query && $query->num_rows() == 0)
         {
@@ -967,7 +995,7 @@ class MY_Model extends CI_Model {
      */
     public function modified_on($row)
     {
-        if (!array_key_exists($this->modified_field, $row))
+        if (is_array($row) && !array_key_exists($this->modified_field, $row))
         {
             $row[$this->modified_field] = $this->set_date();
         }
@@ -1047,10 +1075,14 @@ class MY_Model extends CI_Model {
      * Validates the data passed into it based upon the form_validation rules
      * setup in the $this->validate property.
      *
+     * If $type == 'insert', any additional rules in the class var $insert_validate_rules
+     * for that field will be added to the rules.
+     *
      * @param  array $data      An array of validation rules
+     * @param  string $type     Either 'update' or 'insert'.
      * @return array/bool       The original data or FALSE
      */
-    public function validate($data)
+    public function validate($data, $type='update')
     {
         if($this->skip_validation)
         {
@@ -1068,6 +1100,20 @@ class MY_Model extends CI_Model {
 
             if(is_array($this->validate))
             {
+                // Any insert additions?
+                if ($type == 'insert'
+                    && is_array($this->insert_validate_rules)
+                    && !empty($this->insert_validate_rules))
+                {
+                    foreach ($this->validate as &$row)
+                    {
+                        if (isset($this->insert_validate_rules[$row['field']]))
+                        {
+                            $row ['rules'] .= '|'. $this->insert_validate_rules[$row['field']];
+                        }
+                    }
+                }
+
                 $this->form_validation->set_rules($this->validate);
 
                 if ($this->form_validation->run() === TRUE)
@@ -1245,6 +1291,6 @@ class MY_Model extends CI_Model {
     public function limit($value, $offset = '') { $this->db->limit($value, $offset); return $this; }
     public function offset($offset) { $this->db->offset($offset); return $this; }
     public function set($key, $value = '', $escape = TRUE) { $this->db->set($key, $value, $escape); return $this; }
-    public function count_all_results() { $this->db->count_all_results($this->_table); return $this; }
+    public function count_all_results() { return $this->db->count_all_results($this->_table); }
 
 }

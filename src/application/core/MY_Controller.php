@@ -24,8 +24,14 @@ class MY_Controller extends CI_Controller {
     private $use_view     = '';
     private $use_layout   = '';
 
+    protected $external_scripts = array();
+    protected $stylesheets = array();
+
     // Stores data variables to be sent to the view.
     protected $vars = array();
+
+    // For status messages
+    protected $message;
 
     //--------------------------------------------------------------------
 
@@ -61,6 +67,27 @@ class MY_Controller extends CI_Controller {
         }
 
         //--------------------------------------------------------------------
+        // Migrations
+        //--------------------------------------------------------------------
+
+        // Try to auto-migrate any files stored in APPPATH ./migrations
+        if ($this->config->item('auto_migrate') === TRUE)
+        {
+            $this->load->library('migration');
+
+            // We can specify a version to migrate to by appending ?migrate_to=X
+            // in the URL.
+            if ($mig_version = $this->input->get('migrate_to'))
+            {
+                $this->migration->version($mig_version);
+            }
+            else
+            {
+                $this->migration->latest();
+            }
+        }
+
+        //--------------------------------------------------------------------
         // Profiler
         //--------------------------------------------------------------------
 
@@ -69,6 +96,7 @@ class MY_Controller extends CI_Controller {
         // and it's cousins.
         if ($this->config->item('show_profiler') == true)
         {
+            $this->load->library('console');
             $this->output->enable_profiler(true);
         }
 
@@ -81,6 +109,9 @@ class MY_Controller extends CI_Controller {
 
         }
 
+        $this->set_var('active_menu', '');
+
+        $this->load->driver('Auth');
     }
 
     //--------------------------------------------------------------------
@@ -122,8 +153,15 @@ class MY_Controller extends CI_Controller {
         // Merge any saved vars into the data
         $data = array_merge($data, $this->vars);
 
+        // Make sure any scripts/stylesheets are available to the view
+        $data['external_scripts'] = $this->external_scripts;
+        $data['stylesheets'] = $this->stylesheets;
+
         // We'll make the view content available to the template.
         $data['view_content'] =  $this->load->view($view, $data, true);
+
+        // Build our notices from the theme's view file.
+        $data['notice'] = $this->load->view('theme/notice', array('notice' => $this->message()), true);
 
         // Render our layout and we're done!
         $layout = !empty($this->use_layout) ? $this->use_layout : 'index';
@@ -142,9 +180,19 @@ class MY_Controller extends CI_Controller {
      * @param string $name
      * @param mixed $value
      */
-    public function set_var($name, $value)
+    public function set_var($name, $value=null)
     {
-        $this->vars[$name] = $value;
+        if (is_array($name))
+        {
+            foreach ($name as $k => $v)
+            {
+                $this->vars[$k] = $v;
+            }
+        }
+        else
+        {
+            $this->vars[$name] = $value;
+        }
     }
 
     //--------------------------------------------------------------------
@@ -187,6 +235,88 @@ class MY_Controller extends CI_Controller {
         $this->use_layout = $view;
 
         return $this;
+    }
+
+    //--------------------------------------------------------------------
+
+    //--------------------------------------------------------------------
+    // Status Messages
+    //--------------------------------------------------------------------
+
+    /**
+     * Sets a status message (for displaying small success/error messages).
+     * This is used in place of the session->flashdata functions since you
+     * don't always want to have to refresh the page to show the message.
+     *
+     * @param string $message The message to save.
+     * @param string $type    The string to be included as the CSS class of the containing div.
+     */
+    public function set_message($message='', $type='info')
+    {
+        if (!empty($message))
+        {
+            if (isset($this->session))
+            {
+                $this->session->set_flashdata('message', $type .'::'. $message);
+            }
+
+            $this->message = array(
+                'type'      => $type,
+                'message'   => $message
+            );
+        }
+    }
+
+    //--------------------------------------------------------------------
+
+    /**
+     * Retrieves the status message to display (if any).
+     *
+     * @param  string $message [description]
+     * @param  string $type    [description]
+     * @return array
+     */
+    public function message($message='', $type='info')
+    {
+        $return = array(
+            'message'   => $message,
+            'type'      => $type
+        );
+
+        // Does session data exist?
+        if (empty($message) && class_exists('CI_Session'))
+        {
+            $message = $this->session->flashdata('message');
+
+            if ( ! empty($message))
+            {
+                // Split out our message parts
+                $temp_message = explode('::', $message);
+                $return['type']     = $temp_message[0];
+                $return['message']  = $temp_message[1];
+
+                unset($temp_message);
+            }
+        }
+
+        // If message is empty, we need to check our own storage.
+        if (empty($message))
+        {
+            if (empty($this->message['message']))
+            {
+                return '';
+            }
+
+            $return = $this->message;
+        }
+
+        // Clear our session data so we don't get extra messages on rare occassions.
+        if (class_exists('CI_Session'))
+        {
+            $this->session->set_flashdata('message', '');
+        }
+
+        return $return;
     }
 
     //--------------------------------------------------------------------
@@ -253,18 +383,16 @@ class MY_Controller extends CI_Controller {
                 $json['fragments'] = array();
             }
 
-            $this->load->library('profiler');
-            $json['fragments']['#profiler'] = $this->profiler->run();
+            if ($this->config->item('show_profile'))
+            {
+                $this->load->library('profiler');
+                $json['fragments']['#profiler'] = $this->profiler->run();
+            }
 
             // Also, include our notices in the fragments array.
             if ($this->ajax_notices === true)
             {
-                // Are we specifying a theme other than the default?
-                if (!empty($this->theme))
-                {
-                    Template::set_theme($this->theme);
-                }
-                $json['fragments']['#notices'] = Template::load_view('_notices', true);
+                $json['fragments']['#notices'] = $this->load->view('theme/notice', array('notice' => $this->message()), true);
             }
         }
 
@@ -363,4 +491,68 @@ class MY_Controller extends CI_Controller {
     }
 
     //--------------------------------------------------------------------
+
+    //--------------------------------------------------------------------
+    // 'Asset' functions
+    //--------------------------------------------------------------------
+
+    /**
+     * Adds an external javascript file to the 'external_scripts' array.
+     *
+     * @param [type] $filename [description]
+     */
+    public function add_script($filename)
+    {
+        if (strpos($filename, 'http') === FALSE)
+        {
+            $filename = base_url() .'assets/js/'. $filename;
+        }
+
+        $this->external_scripts[] = $filename;
+    }
+
+    //--------------------------------------------------------------------
+
+    /**
+     * Adds an external stylesheet file to the 'stylesheets' array.
+     */
+    public function add_style($filename)
+    {
+        if (strpos($filename, 'http') === FALSE)
+        {
+            $filename = base_url() .'assets/css/'. $filename;
+        }
+
+        $this->stylesheets[] = $filename;
+    }
+
+    //--------------------------------------------------------------------
+
+}
+
+//--------------------------------------------------------------------
+
+/*
+    AUTHENTICATED CONTROLLER
+
+    Simply makes sure that someone is logged in and ready to roll.
+ */
+class Authenticated_Controller extends MY_Controller {
+
+    public function __construct()
+    {
+        parent::__construct();
+
+        $this->load->driver('Auth');
+/*
+        if (!$this->auth->logged_in())
+        {
+            $this->session->set_userdata('after_login', current_url());
+            redirect('/login');
+        }
+        */
+    }
+
+    //--------------------------------------------------------------------
+
 }

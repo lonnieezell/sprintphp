@@ -17,7 +17,15 @@ class Users extends MY_Controller {
 
     public function index()
     {
-        die('here');
+        $users = $this->user_model->limit(25)->find_all();
+
+        $data = array(
+            'users' => $users,
+            'total_users' => $this->user_model->count_all()
+        );
+
+        $this->set_var('page_title', 'Users');
+        $this->render($data);
     }
 
     //--------------------------------------------------------------------
