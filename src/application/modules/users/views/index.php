@@ -1,6 +1,6 @@
 <?php if (isset($users) && is_array($users) && count($users)) : ?>
 
-    <table style="width: 100%">
+    <table class="table table-striped table-hover">
         <thead>
             <tr>
                 <th>ID</th>

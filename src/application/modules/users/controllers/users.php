@@ -17,7 +17,9 @@ class Users extends MY_Controller {
 
     public function index()
     {
-        $users = $this->user_model->limit(25)->find_all();
+        $users = $this->user_model->limit(25)
+                                  ->select('id, email, username, last_login')
+                                  ->find_all();
 
         $data = array(
             'users' => $users,
