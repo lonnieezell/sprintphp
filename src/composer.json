@@ -1,5 +1,20 @@
 {
+    "name": "lonnieezell/sprintphp",
+    "description": "A lightweight yet powerful, way to start your next CodeIgniter project.",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Lonnie Ezell",
+            "email": "lonnieezell@gmail.com",
+            "homepage": "http://lonnieezell.com"
+        }
+    ],
     "require": {
+        "php": ">=5.3.14",
+        "compwright/codeigniter-installers": "*",
         "lonnieezell/codeigniter-forensics": "dev-master"
+    },
+    "require-dev": {
+        "codeception/codeception": "@stable"
     }
 }

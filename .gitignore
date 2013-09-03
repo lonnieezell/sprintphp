@@ -3,3 +3,9 @@
 *.sublime-workspace
 
 src/application/config/development/*
+
+# Composer Installs
+src/sparks/*
+src/vendor/*
+src/composer.lock
+src/codeception.yml
