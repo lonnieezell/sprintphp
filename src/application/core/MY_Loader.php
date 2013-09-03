@@ -51,7 +51,7 @@ class MY_Loader extends HMVC_Loader
     {
         if(!defined('SPARKPATH'))
         {
-            define('SPARKPATH', 'sparks/');
+            define('SPARKPATH', '../sparks/');
         }
 
         $this->_is_lt_210 = (is_callable(array('CI_Loader', 'ci_autoloader'))
