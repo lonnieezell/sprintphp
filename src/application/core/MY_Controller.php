@@ -96,7 +96,7 @@ class MY_Controller extends CI_Controller {
         // and it's cousins.
         if ($this->config->item('show_profiler') == true)
         {
-            $this->load->library('console');
+            $this->load->spark('codeigniter-forensics');
             $this->output->enable_profiler(true);
         }
 
