@@ -15,7 +15,22 @@ class Auth_sprintauth extends CI_Driver {
         // Load our require CI stuff
         $this->ci->load->database();
 
-        // Log us in if we have a remember me cookie
+        $this->autologin();
+    }
+
+    //--------------------------------------------------------------------
+
+    /**
+     * Attempt to log the user in if they've got the remmeber me token
+     * or logged in with 'user_id' in the session.
+     */
+    public function autologin()
+    {
+        if ($this->ci->session->userdata('user_id') )
+        {
+
+        }
+
         $user = $this->is_remembered(TRUE);
 
         if (is_object($user)) $this->user = $user;
@@ -23,6 +38,7 @@ class Auth_sprintauth extends CI_Driver {
     }
 
     //--------------------------------------------------------------------
+
 
     /**
      * Attempts to log a user in using any type of credentials. If the user
@@ -63,15 +79,7 @@ class Auth_sprintauth extends CI_Driver {
             {
                 unset($hasher);
 
-                $this->ci->session->set_userdata(array(
-                    'user_id'   => (int)$user->id
-                ));
-
-                // Do we remember them?
-                if ($remember === TRUE)
-                {
-                    $this->remember_me($user->id);
-                }
+                $this->remember_me($user->id);
 
                 // Save our last login date
                 $data = array(
@@ -142,7 +150,7 @@ class Auth_sprintauth extends CI_Driver {
      * @param  boolean $set_user    If TRUE, will store the user in the parent object.
      * @return boolean [description]
      */
-    private function is_remembered($set_user=FALSE)
+    public function is_remembered($set_user=FALSE)
     {
         $this->ci->load->library('encrypt');
         $this->ci->load->helper('cookie');

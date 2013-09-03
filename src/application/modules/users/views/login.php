@@ -1,21 +1,28 @@
-<?php if (validation_errors()) :?>
-    <?php echo validation_errors(); ?>
-<?php endif; ?>
+<br/>
 
-<?php echo form_open(); ?>
+<div class="row">
+    <div class="large-4 large-offset-4">
+        <h1>Login</h1>
 
-    <input type="hidden" name="redirect" value="/" />
+        <?php if (validation_errors()) :?>
+            <?php echo validation_errors(); ?>
+        <?php endif; ?>
 
-    <label for="email">Email</label>
-    <input type="email" name="email" value="<?php echo set_value('email'); ?>" />
+        <?php echo form_open(); ?>
 
-    <label for="password">Password</label>
-    <input type="password" name="password" value="<?php echo set_value('password'); ?>" />
+            <input type="hidden" name="redirect" value="<?php echo $redirect; ?>" />
 
-    <label for="remember">
-        <input type="checkbox" name="remember" value="1" /> Remember me for future visits?
-    </label>
+            <label for="email">Email</label>
+            <input type="email" name="email" value="<?php echo set_value('email'); ?>" />
 
-    <input type="submit" name="submit" value="Login" />
+            <label for="password">Password</label>
+            <input type="password" name="password" value="<?php echo set_value('password'); ?>" />
 
-<?php echo form_close(); ?>
+            <input type="submit" name="submit" value="Login" />
+
+        <?php echo form_close(); ?>
+
+    </div>
+</div>
+
+<br/>

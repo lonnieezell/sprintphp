@@ -29,6 +29,8 @@ class Auth extends CI_Driver_Library {
 
         // Set the default driver
         $this->_driver = $this->ci->config->item('auth.default_driver');
+
+        $this->user = $this->{$this->_driver}->is_remembered(true);
     }
 
     //--------------------------------------------------------------------
@@ -60,11 +62,18 @@ class Auth extends CI_Driver_Library {
         if ($user)
         {
             $this->user = $user;
-        }
 
-        if (!empty($redirect))
-        {
-            redirect($redirect);
+            // Save the login record.
+            $this->ci->db->insert('user_logins', array(
+                    'user_id'       => $user->id,
+                    'timestamp'     => date('Y-m-d H:i:s'),
+                    'ip_address'    => $this->ci->input->ip_address()
+                ));
+
+            if (!empty($redirect))
+            {
+                redirect($redirect);
+            }
         }
 
         return is_object($user) ? true : false;

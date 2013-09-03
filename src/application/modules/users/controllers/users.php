@@ -17,9 +17,8 @@ class Users extends MY_Controller {
 
     public function index()
     {
-        $users = $this->user_model->limit(25)
-                                  ->select('id, email, username, last_login')
-                                  ->find_all();
+        /*
+        $users = $this->user_model->limit(25)->find_all();
 
         $data = array(
             'users' => $users,
@@ -28,6 +27,7 @@ class Users extends MY_Controller {
 
         $this->set_var('page_title', 'Users');
         $this->render($data);
+        */
     }
 
     //--------------------------------------------------------------------
@@ -36,10 +36,24 @@ class Users extends MY_Controller {
     {
         $this->load->library('form_validation');
 
+        $redirect = $this->input->post('redirect');
+
+        // Any chance it was set in the session?
+        if ($this->session->userdata('after_login'))
+        {
+            $redirect = $this->session->userdata('after_login');
+            $this->session->unset_userdata('after_login');
+        }
+
+        if ($redirect == site_url() || empty($redirect))
+        {
+            $redirect .= 'manage';
+        }
+
+        $this->set_var('redirect', $redirect);
+
         if ($this->input->post('submit'))
         {
-            $redirect = $this->input->post('redirect');
-
             $remember = (boolean)$this->input->post('remember');
 
             $data = array(
@@ -52,15 +66,27 @@ class Users extends MY_Controller {
 
             if ($this->form_validation->run())
             {
-                $this->auth->login($data, $remember, $redirect);
+                if ($this->auth->login($data, $remember))
+                {
+                    redirect($redirect);
+                }
             }
         }
 
-        $this->set_var('page_title', 'Login');
         $this->render();
     }
 
     //--------------------------------------------------------------------
+
+    public function logout()
+    {
+        $redirect = site_url();
+
+        $this->auth->logout($redirect);
+    }
+
+    //--------------------------------------------------------------------
+
 
     public function register()
     {

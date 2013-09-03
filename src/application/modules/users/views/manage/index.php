@@ -1,3 +1,6 @@
+
+<a href="<?php echo site_url('manage/users/create') ?>" class="button small secondary">New User</a>
+
 <?php if (isset($users) && is_array($users) && count($users)) : ?>
 
     <table style="width: 100%">
@@ -14,7 +17,7 @@
             <tr>
                 <td><?php echo $user->id ?></td>
                 <td>
-                    <a href="/users/edit/<?php echo $user->id ?>">
+                    <a href="<?php echo site_url('manage/users/edit/') .'/'. $user->id ?>">
                         <?php echo $user->username ?>
                     </a>
                 </td>

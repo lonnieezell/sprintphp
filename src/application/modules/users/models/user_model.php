@@ -31,12 +31,12 @@ class User_model extends MY_Model {
         array(
             'field' => 'username',
             'label' => 'Username',
-            'rules' => 'trim|max_length[60]|is_unique[users.username]|xss_clean'
+            'rules' => 'trim|max_length[60]|xss_clean'
         ),
         array(
             'field' => 'email',
             'label' => 'Email',
-            'rules' => 'trim|max_length[255]|valid_email|is_unique[users.username]|xss_clean'
+            'rules' => 'trim|max_length[255]|valid_email|xss_clean'
         ),
         array(
             'field' => 'password',
@@ -48,6 +48,13 @@ class User_model extends MY_Model {
             'label' => 'Password (again)',
             'rules' => 'matches[password]'
         )
+    );
+
+    protected $insert_validate_rules = array(
+        'username'  => 'required|is_unique[users.username]',
+        'email'     => 'required|is_unique[users.email]',
+        'password'  => 'required',
+        'pass_confirm'  => 'required',
     );
 
     //--------------------------------------------------------------------
@@ -116,6 +123,27 @@ class User_model extends MY_Model {
         }
 
         return $data;
+    }
+
+    //--------------------------------------------------------------------
+
+    //--------------------------------------------------------------------
+    // Login History Methods
+    //--------------------------------------------------------------------
+
+    public function get_history()
+    {
+        $query = $this->db->select('user_logins.*, users.username, users.email')
+                          ->join('users', 'user_logins.user_id = users.id', 'left')
+                          ->order_by('timestamp', 'desc')
+                          ->get('user_logins');
+
+        if ( ! $query->num_rows())
+        {
+            return null;
+        }
+
+        return $query->result();
     }
 
     //--------------------------------------------------------------------
