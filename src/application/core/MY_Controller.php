@@ -22,6 +22,7 @@ class MY_Controller extends CI_Controller {
     protected $model_file = NULL;
 
     private $use_view     = '';
+    protected $view_folder  = '';
     private $use_layout   = '';
 
     protected $external_scripts = array();
@@ -149,6 +150,11 @@ class MY_Controller extends CI_Controller {
     {
         // Calc our view name based on current method/controller
         $view = !empty($this->use_view) ? $this->use_view : $this->router->fetch_class() .'/'. $this->router->fetch_method();
+
+        if (!empty($this->view_folder))
+        {
+            $view = $this->view_folder .'/'. $view;
+        }
 
         // Merge any saved vars into the data
         $data = array_merge($data, $this->vars);

@@ -38,13 +38,18 @@
 |
 */
 
-$route['default_controller'] = "welcome";
+$route['default_controller'] = "home";
 $route['404_override'] = '';
 
 // User Logins
 $route['login'] = 'users/login';
 $route['logout'] = 'users/logout';
 $route['register'] = 'users/register';
+
+// Admin area
+Route::area('admin', 'admin');
+
+$route = Route::map($route);
 
 /* End of file routes.php */
 /* Location: ./application/config/routes.php */

@@ -8,16 +8,16 @@ class MY_Router extends HMVC_Router {
      * Ensures that the Route class' routes
      * are added to the routes in the parent classes.
      */
-    public function _parse_routes()
-    {
-        $routes = Route::$routes;
+    // public function _parse_routes()
+    // {
+    //     $routes = Route::$routes;
 
-        $this->routes = array_merge($this->routes, $routes);
+    //     $this->routes = array_merge($this->routes, $routes);
 
-        return parent::_parse_routes();
-    }
+    //     return parent::_parse_routes();
+    // }
 
-    //--------------------------------------------------------------------
+    // //--------------------------------------------------------------------
 
 }
 
@@ -47,7 +47,37 @@ class Route {
     // Holds the 'areas' of the site.
     public static $areas    = array();
 
+    public static $route;
+
     //--------------------------------------------------------------------
+
+    public function init(&$route=null)
+    {
+        self::$route = $route;
+    }
+
+    //--------------------------------------------------------------------
+
+
+    /**
+     * Attaches the routes in the system to the global $config array.
+     * This method should be called in the routes config file after
+     * specifying
+     * @return [type] [description]
+     */
+    public function map($route)
+    {
+
+        foreach (self::$routes as $from => $to)
+        {
+            $route[$from] = str_replace('{default_controller}', $route['default_controller'], $to);
+        }
+
+        return $route;
+    }
+
+    //--------------------------------------------------------------------
+
 
     /**
      * A single point to do the actual routing. Can be used in place of
@@ -334,15 +364,21 @@ class Route {
      */
     public static function area($area, $controller)
     {
+        global $route;
+
         // Save the area so we can recognize it later.
         self::$areas[$area] = $controller;
 
         // Create routes for this area.
+        self::create($area .'/(:any)/(:any)/(:any)/(:any)/(:any)/(:any)', '$1/'. $controller .'/$2/$3/$4/$5/$6');
         self::create($area .'/(:any)/(:any)/(:any)/(:any)/(:any)', '$1/'. $controller .'/$2/$3/$4/$5');
         self::create($area .'/(:any)/(:any)/(:any)/(:any)', '$1/'. $controller .'/$2/$3/$4');
         self::create($area .'/(:any)/(:any)/(:any)', '$1/'. $controller .'/$2/$3');
         self::create($area .'/(:any)/(:any)', '$1/'. $controller .'/$2');
         self::create($area .'/(:any)', '$1/'. $controller);
+
+        // Setup a home controller with the name of the area and the default controller
+        self::create($area, $area .'/{default_controller}');
     }
 
     //--------------------------------------------------------------------
