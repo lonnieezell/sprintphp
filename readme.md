@@ -2,7 +2,7 @@
 
 Based on the CodeIgniter 2.1.3 PHP framework, Sprint provides the essential running start to get you to the fun part of building your web applications. It can be thought of as [Bonfire's](http://cibonfire.com) little brother. Where Bonfire is geared toward flexibility and power, Sprint is intended to focus more on simple solutions and performance.
 
-NOTE: THIS IS UNDER HEAVY DEVELOPMENT AT THE MOMENT AND IS NOT INTENDED FOR PUBLIC CONSUMPTION AT THE MOMENT. (That said - it's got some great stuff coming, so keep an eye on it, or take the parts you like at the moment.)
+NOTE: This repo is no longer being maintained. If you would like to take it over please email me at lonnieje@gmail.com.
 
 ## What's In The Box?
 
